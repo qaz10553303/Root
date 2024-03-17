@@ -187,4 +187,10 @@ public class GameManager : SingletonBase<GameManager>
     }
 
 
+    #region Public Interface
+    public void AddWater(float waterAmt)
+    {
+        _water += waterAmt;
+    }
+    #endregion
 }
