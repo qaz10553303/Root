@@ -72,9 +72,10 @@ public class RootController : MonoBehaviour
     {
         if (collision != null)
         {
-
-
-
+            if(collision.TryGetComponent<ItemControllerBase>(out var itemContrller))
+            {
+                itemContrller.OnPickUp();
+            }
         }
     }
 }

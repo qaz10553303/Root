@@ -1,8 +1,9 @@
-using AYellowpaper.SerializedCollections;
 using JetBrains.Rider.Unity.Editor;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public enum GameStatus
 {
@@ -17,7 +18,8 @@ public class GameManager : SingletonBase<GameManager>
     private float _scrollSpd;
     private float _waterDropPerSec;
     private float _time;
-    private float _divedDepth;
+    private float _currDepth;
+    private int _currCase;
     private GameStatus _gameStatus;
     private List<RootController> _rootControllerList = new List<RootController>();
 
@@ -26,15 +28,13 @@ public class GameManager : SingletonBase<GameManager>
     private float _followTimer = 0f;
 
 
-
-
+    public Transform ItemInstantiateRoot;
     public Transform RootInstantiateRoot;
     public GameObject RootEmissionPrefab;
     public GameObject RootWithControllerPrefab;
     public Camera Camera;
 
-    //[SerializedDictionary("Element Type", "Description")]
-    //public Dictionary<int, List<GameObject>> LevelPiecePrefabDict;
+    private SerializedItemCollectionDict _itemCollectionDict;
 
     public void StartGame()
     {
@@ -63,6 +63,10 @@ public class GameManager : SingletonBase<GameManager>
         _gameStatus = GameStatus.End;
     }
 
+    private void Start()
+    {
+        _itemCollectionDict = GetComponent<SerializedItemCollectionDict>();
+    }
 
     private void Update()
     {
@@ -73,7 +77,7 @@ public class GameManager : SingletonBase<GameManager>
 
         _time += Time.deltaTime;
         //_water -= Time.deltaTime * _waterDropPerSec;
-        _divedDepth += Time.deltaTime * _scrollSpd;
+        _currDepth += Time.deltaTime * _scrollSpd;
 
 
         for (int i = 0; i < _rootControllerList.Count; i++)
@@ -83,11 +87,42 @@ public class GameManager : SingletonBase<GameManager>
         }
 
         HandleCameraFollow();
+
+        int newCase = GetMaxCaseNeedForGenerate(_currDepth);
+        while (newCase > _currCase)
+        {
+            _currCase++;
+            GenerateNewCase(_currCase);
+        }
+
         RefreshUI();
 
         if (GameOverCheck())
         {
             EndGame();
+        }
+    }
+
+    private void GenerateNewCase(int newCase)
+    {
+        if(_itemCollectionDict.TryGetValue(newCase,out var itemCollection))
+        {
+            if (itemCollection.Collections.Count > 0)
+            {
+                int collectionIndex = Random.Range(0, itemCollection.Collections.Count);
+                var prefab = itemCollection.Collections[collectionIndex];
+                var collectionGo = GameObject.Instantiate(prefab, ItemInstantiateRoot);
+                int caseY = GetCaseY(newCase);
+                collectionGo.transform.localPosition = new Vector3(0, caseY, 0);
+            }
+            else
+            {
+                Debug.LogError($"Collection:{newCase} is an empty list!");
+            }
+        }
+        else
+        {
+            Debug.LogError($"Collection:{newCase} is not present in dict!");
         }
     }
 
@@ -120,7 +155,7 @@ public class GameManager : SingletonBase<GameManager>
 
     private void RefreshUI()
     {
-        UIManager.Instance.RefreshDivedMeterText(_divedDepth);
+        UIManager.Instance.RefreshDivedMeterText(_currDepth);
         UIManager.Instance.RefreshWater(_water,GameConfig.MAX_WATER);
     }
 
@@ -138,7 +173,8 @@ public class GameManager : SingletonBase<GameManager>
         _rootControllerList = new List<RootController>();
         _gameStatus = GameStatus.NotStarted;
         _time = 0;
-        _divedDepth = 0;
+        _currDepth = 0;
+        _currCase = 0;
         _water = GameConfig.GAME_START_WATER;
         _scrollSpd = GameConfig.GAME_START_SCROLL_SPD;
         _waterDropPerSec = GameConfig.GAME_START_WATER;
@@ -154,17 +190,34 @@ public class GameManager : SingletonBase<GameManager>
         return controller;
     }
 
+
+
+    public float GetCurrentDepth()
+    {
+        return _currDepth;
+    }
+
+    #region Utils
+    private static int GetMaxCaseNeedForGenerate(float currDepth)
+    {
+        //miller todo:
+        //GameConfig.CASE_Y_LENGTH
+        //GameConfig.CASE_SPACING
+        //GameConfig.PRE_RENDER_DEPTH;
+        return 0;
+    }
+
+    private static int GetCaseY(int caseNum)
+    {
+        //miller todo:
+        return 0;
+    }
+
     private static float GetPosXByPercInScreen(float posXPercInScreen)
     {
         var xLocalPos = Screen.width * (posXPercInScreen - 50) / 100;
         return xLocalPos;
     }
-
-    public float GetCurrentDepth()
-    {
-        return _divedDepth;
-    }
-
     private float FindCameraTowardsXPos()
     {
         float minX = 0;
@@ -185,6 +238,7 @@ public class GameManager : SingletonBase<GameManager>
 
         return resultXPos;
     }
+    #endregion
 
 
     #region Public Interface
