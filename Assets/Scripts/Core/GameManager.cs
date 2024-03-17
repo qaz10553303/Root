@@ -156,4 +156,12 @@ public class GameManager : SingletonBase<GameManager>
         }
         return (minX + maxX) / 2;
     }
+
+
+    #region Public Interface
+    public void AddWater(float waterAmt)
+    {
+        _water += waterAmt;
+    }
+    #endregion
 }
