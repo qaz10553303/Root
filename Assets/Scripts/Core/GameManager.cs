@@ -73,7 +73,9 @@ public class GameManager : SingletonBase<GameManager>
             controller.Tick();
         }
 
-        //MoveCamera();
+        Debug.Log("[Update] Before MoveCamera"); // 在调用MoveCamera之前输出日志
+        MoveCamera();
+        Debug.Log("[Update] After MoveCamera"); // 在调用MoveCamera之后输出日志
 
         RefreshUI();
 
@@ -86,10 +88,12 @@ public class GameManager : SingletonBase<GameManager>
     private void MoveCamera()
     {
         var xPos = FindCameraTowardsXPos();
-        //var x = GameConfig.CAMERA_X_MOVE_SPD * Time.deltaTime;
         var yPos = Camera.transform.position.y - (GameConfig.GAME_START_SCROLL_SPD * Time.deltaTime);
-        Camera.transform.position = new Vector3(xPos, yPos,-10);
+        Debug.Log($"[MoveCamera] Target Camera Position: X={xPos}, Y={yPos}"); // 日志输出目标位置
+        Camera.transform.position = new Vector3(xPos, yPos, -10);
+        Debug.Log($"[MoveCamera] Actual Camera Position: {Camera.transform.position}"); // 日志输出实际位置
     }
+
 
     private void RefreshUI()
     {
@@ -154,7 +158,9 @@ public class GameManager : SingletonBase<GameManager>
                 maxX = xPos;
             }
         }
-        return (minX + maxX) / 2;
+        var resultXPos = (minX + maxX) / 2;
+
+        return resultXPos;
     }
 
 
