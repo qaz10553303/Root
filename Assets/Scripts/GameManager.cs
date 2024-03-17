@@ -21,6 +21,13 @@ public class GameManager : SingletonBase<GameManager>
     private GameStatus _gameStatus;
     private List<RootController> _rootControllerList = new List<RootController>();
 
+    private bool _shouldStartFollowing = false;
+    private float _initialFollowDelay = 3f;
+    private float _followTimer = 0f;
+
+
+
+
     public Transform RootInstantiateRoot;
     public GameObject RootEmissionPrefab;
     public GameObject RootWithControllerPrefab;
@@ -31,6 +38,7 @@ public class GameManager : SingletonBase<GameManager>
 
     public void StartGame()
     {
+
         if (_gameStatus != GameStatus.NotStarted)
         {
             return;
@@ -58,7 +66,7 @@ public class GameManager : SingletonBase<GameManager>
 
     private void Update()
     {
-        if(_gameStatus != GameStatus.Started)
+        if (_gameStatus != GameStatus.Started)
         {
             return;
         }
@@ -67,16 +75,14 @@ public class GameManager : SingletonBase<GameManager>
         //_water -= Time.deltaTime * _waterDropPerSec;
         _divedDepth += Time.deltaTime * _scrollSpd;
 
+
         for (int i = 0; i < _rootControllerList.Count; i++)
         {
             var controller = _rootControllerList[i];
             controller.Tick();
         }
 
-        Debug.Log("[Update] Before MoveCamera"); // 在调用MoveCamera之前输出日志
-        MoveCamera();
-        Debug.Log("[Update] After MoveCamera"); // 在调用MoveCamera之后输出日志
-
+        HandleCameraFollow();
         RefreshUI();
 
         if (GameOverCheck())
@@ -85,13 +91,30 @@ public class GameManager : SingletonBase<GameManager>
         }
     }
 
+    private void HandleCameraFollow()
+    {
+        if (!_shouldStartFollowing)
+        {
+            _followTimer += Time.deltaTime;
+            if (_followTimer >= _initialFollowDelay)
+            {
+                _shouldStartFollowing = true;
+            }
+        }
+
+        if (_shouldStartFollowing)
+        {
+            MoveCamera();
+        }
+    }
+
+
+
     private void MoveCamera()
     {
         var xPos = FindCameraTowardsXPos();
         var yPos = Camera.transform.position.y - (GameConfig.GAME_START_SCROLL_SPD * Time.deltaTime);
-        Debug.Log($"[MoveCamera] Target Camera Position: X={xPos}, Y={yPos}"); // 日志输出目标位置
         Camera.transform.position = new Vector3(xPos, yPos, -10);
-        Debug.Log($"[MoveCamera] Actual Camera Position: {Camera.transform.position}"); // 日志输出实际位置
     }
 
 
