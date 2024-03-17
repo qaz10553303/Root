@@ -2,7 +2,7 @@
 
 public static class GameConfig
 {
-    public static readonly int GAME_START_SCROLL_SPD = 1;
+    public static readonly int GAME_START_SCROLL_SPD = 3;
     public static readonly int GAME_START_WATER = 100;
     public static readonly int MAX_WATER = 100;
     public static readonly int WATER_DROP_PER_SEC = 10;
@@ -12,7 +12,7 @@ public static class GameConfig
     public static readonly float ROOT_ROTATION_SPD = 100f;
     public static readonly Vector3 CAMERA_INIT_POS = new Vector3(0,0,-10);
     public static readonly float CAMERA_X_MOVE_SPD = 2f;
-    public static readonly float CASE_SPACING = 100f;
-    public static readonly float CASE_Y_LENGTH = 100f;
-    public static readonly float PRE_RENDER_DEPTH = 3000f;
+    public static readonly float CASE_SPACING = 0f;
+    public static readonly float CASE_Y_LENGTH = 5f;
+    public static readonly float PRE_RENDER_DEPTH = 100f;
 }

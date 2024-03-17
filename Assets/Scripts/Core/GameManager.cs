@@ -24,7 +24,7 @@ public class GameManager : SingletonBase<GameManager>
     private List<RootController> _rootControllerList = new List<RootController>();
 
     private bool _shouldStartFollowing = false;
-    private float _initialFollowDelay = 3f;
+    private float _initialFollowDelay = 1f;
     private float _followTimer = 0f;
 
 
@@ -76,7 +76,7 @@ public class GameManager : SingletonBase<GameManager>
         }
 
         _time += Time.deltaTime;
-        //_water -= Time.deltaTime * _waterDropPerSec;
+        _water -= Time.deltaTime * _waterDropPerSec;
         _currDepth += Time.deltaTime * _scrollSpd;
 
 
@@ -144,10 +144,10 @@ public class GameManager : SingletonBase<GameManager>
     }
 
 
-
     private void MoveCamera()
     {
-        var xPos = FindCameraTowardsXPos();
+        //var xPos = FindCameraTowardsXPos();
+        var xPos = 0;
         var yPos = Camera.transform.position.y - (GameConfig.GAME_START_SCROLL_SPD * Time.deltaTime);
         Camera.transform.position = new Vector3(xPos, yPos, -10);
     }
@@ -177,7 +177,7 @@ public class GameManager : SingletonBase<GameManager>
         _currCase = 0;
         _water = GameConfig.GAME_START_WATER;
         _scrollSpd = GameConfig.GAME_START_SCROLL_SPD;
-        _waterDropPerSec = GameConfig.GAME_START_WATER;
+        _waterDropPerSec = GameConfig.WATER_DROP_PER_SEC;
         Camera.transform.position = GameConfig.CAMERA_INIT_POS;
     }
 
@@ -200,18 +200,17 @@ public class GameManager : SingletonBase<GameManager>
     #region Utils
     private static int GetMaxCaseNeedForGenerate(float currDepth)
     {
-        //miller todo:
-        //GameConfig.CASE_Y_LENGTH
-        //GameConfig.CASE_SPACING
-        //GameConfig.PRE_RENDER_DEPTH;
-        return 0;
+        double casesNeeded = Math.Floor((currDepth + GameConfig.PRE_RENDER_DEPTH) / (GameConfig.CASE_Y_LENGTH + GameConfig.CASE_SPACING));
+
+        return (int)casesNeeded;
     }
 
-    private static int GetCaseY(int caseNum)
+    public int GetCaseY(int newCase)
     {
-        //miller todo:
-        return 0;
+        float currentDepth = GetCurrentDepth();
+        return (int)(currentDepth + (newCase - 1) * (GameConfig.CASE_Y_LENGTH + GameConfig.CASE_SPACING) + 0.5 * GameConfig.CASE_Y_LENGTH)*(-1);
     }
+
 
     private static float GetPosXByPercInScreen(float posXPercInScreen)
     {
@@ -245,6 +244,7 @@ public class GameManager : SingletonBase<GameManager>
     public void AddWater(float waterAmt)
     {
         _water += waterAmt;
+        _water = Mathf.Clamp(_water, 0, GameConfig.MAX_WATER);
     }
     #endregion
 }
