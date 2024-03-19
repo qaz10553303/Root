@@ -10,7 +10,7 @@ public static class GameConfig
     public static readonly float MOST_LEFT_ROOT_ROTATION_Z = 150;
     public static readonly float MOST_RIGHT_ROOT_ROTATION_Z = 210;
     public static readonly float ROOT_ROTATION_SPD = 100f;
-    public static readonly Vector3 CAMERA_INIT_POS = new Vector3(0,0,-10);
+    public static readonly Vector3 CAMERA_INIT_POS = new Vector3(0,-7,-10);
     public static readonly float CAMERA_X_MOVE_SPD = 2f;
     public static readonly float CASE_SPACING = 0f;
     public static readonly float CASE_Y_LENGTH = 5f;

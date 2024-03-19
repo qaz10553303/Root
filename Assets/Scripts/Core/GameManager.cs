@@ -8,9 +8,11 @@ using Random = UnityEngine.Random;
 public enum GameStatus
 {
     NotStarted = 0,
-    Started = 1,
-    End = 2,
+    Prepared = 1,
+    Started = 2,
+    End = 3,
 }
+
 
 public class GameManager : SingletonBase<GameManager>
 {
@@ -27,6 +29,9 @@ public class GameManager : SingletonBase<GameManager>
     private float _initialFollowDelay = 1f;
     private float _followTimer = 0f;
 
+    public float cameraPrepMoveSpeed = 0.5f;
+
+
 
     public Transform ItemInstantiateRoot;
     public Transform RootInstantiateRoot;
@@ -38,20 +43,42 @@ public class GameManager : SingletonBase<GameManager>
 
     public void StartGame()
     {
-
         if (_gameStatus != GameStatus.NotStarted)
         {
             return;
         }
-        Debug.LogError("Game Start!");
+        Debug.LogError("Preparing Game...");
 
+        _gameStatus = GameStatus.Prepared;
+
+        StartCoroutine(StartGameAfterPreparation(1.5f));
+    }
+
+    private IEnumerator StartGameAfterPreparation(float duration)
+    {
+        float elapsedTime = 0;
+
+        Vector3 startPos = Camera.transform.position;
+        Vector3 endPos = new Vector3(Camera.transform.position.x, Camera.transform.position.y - cameraPrepMoveSpeed * duration, Camera.transform.position.z);
+
+        while (elapsedTime < duration)
+        {
+            Camera.transform.position = Vector3.Lerp(startPos, endPos, (elapsedTime / duration));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        Camera.transform.position = endPos;
+
+        Debug.LogError("Game Start!");
         InitValues();
 
-        var controller = InstantiateNewRootController(50,GameSetting.root1LeftKey,GameSetting.root1RightKey);
+        var controller = InstantiateNewRootController(50, GameSetting.root1LeftKey, GameSetting.root1RightKey);
         _rootControllerList.Add(controller);
 
         _gameStatus = GameStatus.Started;
     }
+
 
     public void EndGame()
     {
@@ -185,7 +212,7 @@ public class GameManager : SingletonBase<GameManager>
     {
         var go = GameObject.Instantiate(RootWithControllerPrefab,RootInstantiateRoot);
         var controller = go.GetComponentInChildren<RootController>();
-        var initPos = new Vector3(GetPosXByPercInScreen(posXPercInScreen), 6,0);
+        var initPos = new Vector3(GetPosXByPercInScreen(posXPercInScreen), -4,0);
         controller.Init(leftKey, rightKey, initPos,_scrollSpd);
         return controller;
     }
@@ -205,10 +232,9 @@ public class GameManager : SingletonBase<GameManager>
         return (int)casesNeeded;
     }
 
-    public int GetCaseY(int newCase)
+    public static int GetCaseY(int newCase)
     {
-        float currentDepth = GetCurrentDepth();
-        return (int)(currentDepth + (newCase - 1) * (GameConfig.CASE_Y_LENGTH + GameConfig.CASE_SPACING) + 0.5 * GameConfig.CASE_Y_LENGTH)*(-1);
+        return (int)(10 + (newCase - 1) * (GameConfig.CASE_Y_LENGTH + GameConfig.CASE_SPACING) + 0.5 * GameConfig.CASE_Y_LENGTH)*(-1);
     }
 
 
