@@ -86,7 +86,7 @@ public class GameManager : SingletonBase<GameManager>
         Debug.LogError("Game End!");
         _gameStatus = GameStatus.End;
 
-        StartCoroutine(MoveCameraUpwards(5.0f, _currDepth));
+        StartCoroutine(MoveCameraUpwards(10.0f, _currDepth));
     }
 
     private IEnumerator MoveCameraUpwards(float speed, float distance)
