@@ -26,10 +26,7 @@ public class GameManager : SingletonBase<GameManager>
     private List<RootController> _rootControllerList = new List<RootController>();
 
     private bool _shouldStartFollowing = false;
-    private float _initialFollowDelay = 1f;
     private float _followTimer = 0f;
-
-    public float cameraPrepMoveSpeed = 0.5f;
 
 
 
@@ -59,7 +56,7 @@ public class GameManager : SingletonBase<GameManager>
         float elapsedTime = 0;
 
         Vector3 startPos = Camera.transform.position;
-        Vector3 endPos = new Vector3(Camera.transform.position.x, Camera.transform.position.y - cameraPrepMoveSpeed * duration, Camera.transform.position.z);
+        Vector3 endPos = new Vector3(Camera.transform.position.x, Camera.transform.position.y - GameConfig.CAMERA_PREP_MOVE_SPEED * duration, Camera.transform.position.z);
 
         while (elapsedTime < duration)
         {
@@ -88,8 +85,27 @@ public class GameManager : SingletonBase<GameManager>
         }
         Debug.LogError("Game End!");
         _gameStatus = GameStatus.End;
+
+        StartCoroutine(MoveCameraUpwards(5.0f, _currDepth));
     }
 
+    private IEnumerator MoveCameraUpwards(float speed, float distance)
+    {
+        Vector3 startPos = Camera.transform.position;
+        Vector3 endPos = new Vector3(Camera.transform.position.x, Camera.transform.position.y + distance, Camera.transform.position.z);
+
+        float totalDuration = distance / speed;
+        float elapsedTime = 0;
+
+        while (elapsedTime < totalDuration)
+        {
+            Camera.transform.position = Vector3.Lerp(startPos, endPos, (elapsedTime / totalDuration));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        Camera.transform.position = endPos;
+    }
     private void Start()
     {
         _itemCollectionDict = GetComponent<SerializedItemCollectionDict>();
@@ -158,7 +174,7 @@ public class GameManager : SingletonBase<GameManager>
         if (!_shouldStartFollowing)
         {
             _followTimer += Time.deltaTime;
-            if (_followTimer >= _initialFollowDelay)
+            if (_followTimer >= GameConfig.INITIAL_FOLLOW_DELAY)
             {
                 _shouldStartFollowing = true;
             }
