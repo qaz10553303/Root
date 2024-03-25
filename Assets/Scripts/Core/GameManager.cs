@@ -24,6 +24,7 @@ public class GameManager : SingletonBase<GameManager>
     private int _currCase;
     private GameStatus _gameStatus;
     private List<RootController> _rootControllerList = new List<RootController>();
+    private int _currFlag;
 
     private bool _shouldStartFollowing = false;
     private float _followTimer = 0f;
@@ -70,8 +71,7 @@ public class GameManager : SingletonBase<GameManager>
         Debug.LogError("Game Start!");
         InitValues();
 
-        var controller = InstantiateNewRootController(50, GameSetting.root1LeftKey, GameSetting.root1RightKey);
-        _rootControllerList.Add(controller);
+        AddNewRoot();
 
         _gameStatus = GameStatus.Started;
     }
@@ -191,7 +191,7 @@ public class GameManager : SingletonBase<GameManager>
     {
         //var xPos = FindCameraTowardsXPos();
         var xPos = 0;
-        var yPos = Camera.transform.position.y - (GameConfig.GAME_START_SCROLL_SPD * Time.deltaTime);
+        var yPos = Camera.transform.position.y - (_scrollSpd * Time.deltaTime);
         Camera.transform.position = new Vector3(xPos, yPos, -10);
     }
 
@@ -218,18 +218,20 @@ public class GameManager : SingletonBase<GameManager>
         _time = 0;
         _currDepth = 0;
         _currCase = 0;
+        _currFlag = 0;
         _water = GameConfig.GAME_START_WATER;
         _scrollSpd = GameConfig.GAME_START_SCROLL_SPD;
         _waterDropPerSec = GameConfig.WATER_DROP_PER_SEC;
         Camera.transform.position = GameConfig.CAMERA_INIT_POS;
     }
 
-    private RootController InstantiateNewRootController(float posXPercInScreen, KeyCode leftKey, KeyCode rightKey)
+    private RootController InstantiateNewRootController(Vector3 initPos, float moveSpd, float spawnAnimTime)
     {
         var go = GameObject.Instantiate(RootWithControllerPrefab,RootInstantiateRoot);
         var controller = go.GetComponentInChildren<RootController>();
-        var initPos = new Vector3(GetPosXByPercInScreen(posXPercInScreen), -4,0);
-        controller.Init(leftKey, rightKey, initPos,_scrollSpd);
+        _rootControllerList.Add(controller);
+        int rootSlot = _rootControllerList.Count;
+        controller.Init(rootSlot, GetRootControlKey(rootSlot, true), GetRootControlKey(rootSlot, false), initPos, moveSpd, spawnAnimTime);
         return controller;
     }
 
@@ -254,7 +256,7 @@ public class GameManager : SingletonBase<GameManager>
     }
 
 
-    private static float GetPosXByPercInScreen(float posXPercInScreen)
+    public static float GetPosXByPercInScreen(float posXPercInScreen)
     {
         var xLocalPos = Screen.width * (posXPercInScreen - 50) / 100;
         return xLocalPos;
@@ -279,6 +281,20 @@ public class GameManager : SingletonBase<GameManager>
 
         return resultXPos;
     }
+    private KeyCode GetRootControlKey(int rootSlot, bool isLeft)
+    {
+        switch (rootSlot)
+        {
+            case 1:
+                return isLeft ? GameSetting.root1LeftKey : GameSetting.root1RightKey;
+            case 2:
+                return isLeft ? GameSetting.root2LeftKey : GameSetting.root2RightKey;
+            default:
+                Debug.LogError($"RootSlot:{rootSlot} undefined!");
+                return KeyCode.None;
+        }
+    }
+
     #endregion
 
 
@@ -287,6 +303,30 @@ public class GameManager : SingletonBase<GameManager>
     {
         _water += waterAmt;
         _water = Mathf.Clamp(_water, 0, GameConfig.MAX_WATER);
+    }
+
+    public void AddNewRoot()
+    {
+        if(_rootControllerList.Count<GameConfig.ROOT_MAX_COUNT)
+        {
+            Vector3 initPos = new Vector3(GetPosXByPercInScreen(50), 0, 0);
+            if (_rootControllerList.Count > 0)
+            {
+                int randIndex = Random.Range(0, _rootControllerList.Count);
+                initPos = _rootControllerList[randIndex].GameObjTrans.localPosition;
+            }
+
+            var rootController = InstantiateNewRootController(initPos, _scrollSpd, 1);
+        }
+    }
+
+    public void AddScrollSpeed(float addAmount)
+    {
+        _scrollSpd += addAmount;
+        for (int i = 0; i < _rootControllerList.Count; i++)
+        {
+            _rootControllerList[i].AddSpeed(addAmount);
+        }
     }
     #endregion
 }
