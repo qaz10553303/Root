@@ -305,6 +305,11 @@ public class GameManager : SingletonBase<GameManager>
         _water = Mathf.Clamp(_water, 0, GameConfig.MAX_WATER);
     }
 
+    public void AddWaterDecrease(float decreaseAmt)
+    {
+        _waterDropPerSec -= decreaseAmt;
+    }
+
     public void AddNewRoot()
     {
         if(_rootControllerList.Count<GameConfig.ROOT_MAX_COUNT)
