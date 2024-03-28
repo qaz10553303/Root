@@ -86,20 +86,19 @@ public class GameManager : SingletonBase<GameManager>
         Debug.LogError("Game End!");
         _gameStatus = GameStatus.End;
 
-        StartCoroutine(MoveCameraUpwards(10.0f, _currDepth + 2.0f));
+        StartCoroutine(MoveCameraUpwards(3f, _currDepth + 2.0f));
     }
 
-    private IEnumerator MoveCameraUpwards(float speed, float distance)
+    private IEnumerator MoveCameraUpwards(float duration, float distance)
     {
         Vector3 startPos = Camera.transform.position;
         Vector3 endPos = new Vector3(Camera.transform.position.x, Camera.transform.position.y + distance, Camera.transform.position.z);
 
-        float totalDuration = distance / speed;
         float elapsedTime = 0;
 
-        while (elapsedTime < totalDuration)
+        while (elapsedTime < duration)
         {
-            Camera.transform.position = Vector3.Lerp(startPos, endPos, (elapsedTime / totalDuration));
+            Camera.transform.position = Vector3.Lerp(startPos, endPos, (elapsedTime / duration));
             elapsedTime += Time.deltaTime;
             yield return null;
         }

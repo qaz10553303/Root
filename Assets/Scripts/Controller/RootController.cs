@@ -47,29 +47,30 @@ public class RootController : MonoBehaviour
 
         _rootStatus = RootStatus.Running;
 
-        var xPerc = GetRootFinalXPosPercBySlot(_rootSlot);
-        var finalX = GameManager.GetPosXByPercInScreen(xPerc);
+        //var xPerc = GetRootFinalXPosPercBySlot(_rootSlot);
+        var finalX = GameManager.GetPosXByPercInScreen(50);
 
         AddSpeed(GameConfig.ROOT_SPAWN_SPEED_BOOST);
-        float xDelta = finalX - GameObjTrans.transform.position.x;
-        if (xDelta > 0)
-        {
-            RotationTrans.localEulerAngles = new Vector3(0, 0, GameConfig.MOST_RIGHT_ROOT_ROTATION_Z);
-        }
-        else if (xDelta < 0)
-        {
-            RotationTrans.localEulerAngles = new Vector3(0, 0, GameConfig.MOST_LEFT_ROOT_ROTATION_Z);
-        }
+        //float xDelta = finalX - GameObjTrans.transform.position.x;
+        //if (xDelta > 0)
+        //{
+        //    RotationTrans.localEulerAngles = new Vector3(0, 0, GameConfig.MOST_RIGHT_ROOT_ROTATION_Z);
+        //}
+        //else if (xDelta < 0)
+        //{
+        //    RotationTrans.localEulerAngles = new Vector3(0, 0, GameConfig.MOST_LEFT_ROOT_ROTATION_Z);
+        //}
+        RotationTrans.localEulerAngles = new Vector3(0, 0, 180);
 
-        bool rotEnd = false;
+        bool rotEnd = true;
         bool boostEnd = false;
         while (!rotEnd || !boostEnd)
         {
-            if (!rotEnd && Mathf.Abs(xDelta) < 0.05f)
-            {
-                RotationTrans.localEulerAngles = new Vector3(0, 0, 180);
-                rotEnd = true;
-            }
+            //if (!rotEnd && Mathf.Abs(xDelta) < 0.05f)
+            //{
+            //    RotationTrans.localEulerAngles = new Vector3(0, 0, 180);
+            //    rotEnd = true;
+            //}
 
             var currDepth = GameManager.Instance.GetCurrentDepth();
             if (!boostEnd && - GameObjTrans.localPosition.y > currDepth)
@@ -156,7 +157,7 @@ public class RootController : MonoBehaviour
         {
             if(collision.TryGetComponent<ItemControllerBase>(out var itemContrller))
             {
-                itemContrller.OnPickUp();
+                itemContrller.PickUp();
             }
         }
     }
