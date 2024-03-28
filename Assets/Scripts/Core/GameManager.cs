@@ -86,7 +86,7 @@ public class GameManager : SingletonBase<GameManager>
         Debug.LogError("Game End!");
         _gameStatus = GameStatus.End;
 
-        StartCoroutine(MoveCameraUpwards(10.0f, _currDepth));
+        StartCoroutine(MoveCameraUpwards(10.0f, _currDepth + 2.0f));
     }
 
     private IEnumerator MoveCameraUpwards(float speed, float distance)
@@ -289,6 +289,10 @@ public class GameManager : SingletonBase<GameManager>
                 return isLeft ? GameSetting.root1LeftKey : GameSetting.root1RightKey;
             case 2:
                 return isLeft ? GameSetting.root2LeftKey : GameSetting.root2RightKey;
+            case 3:
+                return isLeft ? GameSetting.root3LeftKey : GameSetting.root3RightKey;
+            case 4:
+                return isLeft ? GameSetting.root4LeftKey : GameSetting.root4RightKey;
             default:
                 Debug.LogError($"RootSlot:{rootSlot} undefined!");
                 return KeyCode.None;
@@ -307,7 +311,7 @@ public class GameManager : SingletonBase<GameManager>
 
     public void AddWaterDecrease(float decreaseAmt)
     {
-        _waterDropPerSec -= decreaseAmt;
+        _waterDropPerSec += decreaseAmt;
     }
 
     public void AddNewRoot()
